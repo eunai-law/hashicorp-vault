@@ -13,9 +13,9 @@ You do not edit an image while it is running. It is frozen. Every container crea
 > Analogy: An image is a recipe. The recipe itself never changes — but you can cook it (run it) as many times as you want, and each time you get the same dish.
 
 ### Check yourself
-- [ ] I can explain what "read-only" means for an image
-- [ ] I understand that many containers can be created from a single image
-- [ ] I can explain the difference between an image and a container in one sentence
+- [x] I can explain what "read-only" means for an image
+- [x] I understand that many containers can be created from a single image
+- [x] I can explain the difference between an image and a container in one sentence
 
 ---
 
@@ -34,9 +34,9 @@ docker pull nginx
 > Analogy: Docker Hub is like a cookbook store. You can grab a published recipe (pull an image) or write your own from scratch (build an image).
 
 ### Check yourself
-- [ ] I know what Docker Hub is
-- [ ] I know the command to download an image from Docker Hub
-- [ ] I understand that I can also build my own images
+- [x] I know what Docker Hub is
+- [x] I know the command to download an image from Docker Hub
+- [x] I understand that I can also build my own images
 
 ---
 
@@ -63,9 +63,9 @@ docker build -t my-app .
 The `-t` flag gives the image a name (`my-app`). The `.` means "look for the Dockerfile in the current directory."
 
 ### Check yourself
-- [ ] I can describe what a Dockerfile does in my own words
-- [ ] I understand what each line in the example above does at a high level
-- [ ] I know the command to build an image from a Dockerfile
+- [x] I can describe what a Dockerfile does in my own words
+- [x] I understand what each line in the example above does at a high level
+- [x] I know the command to build an image from a Dockerfile
 
 ---
 

@@ -30,8 +30,8 @@ docker run -d nginx
 > Analogy: The image is the recipe. Running a container is cooking the dish. The dish exists independently — you can make another one from the same recipe without affecting the first.
 
 ### Check yourself
-- [ ] I know the command to run a container from an image
-- [ ] I understand what the `-d` flag does and why I would use it
+- [x] I know the command to run a container from an image
+- [x] I understand what the `-d` flag does and why I would use it
 
 ---
 

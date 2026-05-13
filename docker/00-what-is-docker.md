@@ -34,8 +34,8 @@ You install Docker once. After that, any container anyone has built can run on y
 > Analogy: Docker is the shipping port. It loads, unloads, and tracks containers — you don't need to know what's inside each one to move it.
 
 ### Check yourself
-- [ ] I can name the two main pieces of Docker (Engine and CLI)
-- [ ] I understand that Docker runs on my machine and manages containers for me
+- [x] I can name the two main pieces of Docker (Engine and CLI)
+- [x] I understand that Docker runs on my machine and manages containers for me
 
 ---
 
@@ -50,9 +50,9 @@ A **container** is a lightweight, isolated process that runs your app.
 > Analogy: A container is like a rented studio apartment. It has its own kitchen, bathroom, and locks. The tenant inside doesn't know or care about the other apartments in the building.
 
 ### Check yourself
-- [ ] I can explain what "isolated" means for a container
-- [ ] I understand the difference between a container and a full virtual machine
-- [ ] I can describe a container in one sentence to someone who has never heard of Docker
+- [x] I can explain what "isolated" means for a container
+- [x] I understand the difference between a container and a full virtual machine
+- [x] I can describe a container in one sentence to someone who has never heard of Docker
 
 ---
 
