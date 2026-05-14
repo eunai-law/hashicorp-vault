@@ -1,0 +1,79 @@
+flowchart TD
+    subgraph INIT["Project Initialization (once)"]
+        MC["/gsd-map-codebase\n(brownfield only)"]
+        NP["/gsd-new-project"]
+        MC --> |".planning/codebase/"| NP
+        NP --> ROADMAP[(ROADMAP.md\nREQUIREMENTS.md\nPROJECT.md\nSTATE.md)]
+    end
+
+    subgraph LOOP["Per-Phase Loop (repeat for each phase)"]
+        DP["/gsd-discuss-phase N\n[No agents — conversation only]\n[Token cost: Very Low]"]
+        UI["/gsd-ui-phase N\n[UI-SPEC.md — optional]\n[Token cost: Medium]"]
+        PP["/gsd-plan-phase N\n[Research + Plan + Check loop]\n[Token cost: High]"]
+        EP["/gsd-execute-phase N\n[Parallel wave execution]\n[Token cost: Very High]"]
+        VW["/gsd-verify-work N\n[Goal-backward analysis]\n[Token cost: Medium]"]
+        SH["/gsd-ship N\n[Code review + PR]\n[Token cost: Medium]"]
+        ROADMAP --> DP
+        DP --> |"CONTEXT.md\n(locked decisions)"| PP
+        UI --> |"UI-SPEC.md"| PP
+        PP --> |"PLAN.md × N\n(approved)"| EP
+        EP --> |"SUMMARY.md × N\natomic commits"| VW
+        VW --> |"VERIFICATION.md\n(gaps → fix plans → re-execute)"| SH
+        SH --> |"Pull Request"| DONE{Phase\nComplete}
+        DONE --> |"next phase"| DP
+    end
+
+    subgraph PLANNING_AGENTS["Plan-Phase Agents (all fresh 200K context)"]
+        R1["gsd-phase-researcher\n(parallel)"]
+        R2["gsd-pattern-mapper\n(parallel)"]
+        PL["gsd-planner\n(sequential after research)"]
+        PC["gsd-plan-checker\n(sequential after plan)\n[up to 3 revision loops]"]
+        R1 & R2 --> PL --> PC
+    end
+
+    subgraph EXEC_AGENTS["Execute-Phase Agents (all fresh 200K context)"]
+        W1["Wave 1: gsd-executor × N\n(parallel — no dependencies)"]
+        W2["Wave 2: gsd-executor × M\n(parallel — depends on Wave 1)"]
+        W1 --> |"wait all complete"| W2
+    end
+
+    subgraph VERIFY_AGENTS["Verify + Ship Agents"]
+        VR["gsd-verifier\n(fresh context)"]
+        CR["gsd-code-reviewer\n(fresh context)"]
+        CF["gsd-code-fixer\n(optional, fresh context)"]
+        VR --> CR --> CF
+    end
+
+    subgraph TOKENS["Token Cost Zones"]
+        T_CHEAP["Very Low:\ndiscuss, progress, health, stats"]
+        T_MED["Medium:\nverify, ship, code-review, spec"]
+        T_HIGH["High:\nplan-phase, map-codebase"]
+        T_VHIGH["Very High:\nexecute-phase, new-project"]
+    end
+
+    subgraph GIT["Git Layer"]
+        ATOMIC["Atomic commit\nper task\n(executor)"]
+        WAVE_COMMIT["Post-wave\nhook run\n(orchestrator)"]
+        PR["Pull Request\n(ship)"]
+        ATOMIC --> WAVE_COMMIT --> PR
+    end
+
+    subgraph ARTIFACTS[".planning/ External Memory"]
+        A1["PROJECT.md\nREQUIREMENTS.md\nROADMAP.md"]
+        A2["STATE.md\n(living memory)"]
+        A3["phases/N/\nCONTEXT.md\nRESEARCH.md\nPLAN.md\nSUMMARY.md\nVERIFICATION.md"]
+    end
+
+    PP --> PLANNING_AGENTS
+    EP --> EXEC_AGENTS
+    VW --> VERIFY_AGENTS
+    EXEC_AGENTS --> ATOMIC
+    EXEC_AGENTS --> A3
+    PLANNING_AGENTS --> A3
+    VERIFY_AGENTS --> A3
+
+    style T_VHIGH fill:#f44,color:#fff
+    style T_HIGH fill:#f84,color:#fff
+    style T_MED fill:#fa4,color:#000
+    style T_CHEAP fill:#4a4,color:#fff
+    style ARTIFACTS fill:#44f,color:#fff

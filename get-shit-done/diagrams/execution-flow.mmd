@@ -1,0 +1,76 @@
+sequenceDiagram
+    participant U as User
+    participant O as Orchestrator<br/>(session context)
+    participant SDK as gsd-sdk / gsd-tools
+    participant FS as .planning/
+    participant A as Agents<br/>(fresh 200K each)
+    participant GIT as Git
+
+    Note over U,GIT: PROJECT INIT (once)
+    U->>O: /gsd-new-project
+    O->>SDK: init new-project
+    SDK-->>O: domain context
+    O->>A: spawn 4 researchers (parallel)
+    A-->>FS: domain research
+    O->>A: spawn research-synthesizer
+    A-->>FS: SUMMARY.md
+    O->>A: spawn roadmapper
+    A-->>FS: ROADMAP.md + REQUIREMENTS.md + PROJECT.md
+
+    Note over U,GIT: PHASE DISCUSS
+    U->>O: /gsd-discuss-phase 1
+    O->>SDK: init phase-op 1
+    SDK-->>O: phase context
+    O->>U: implementation questions
+    U->>O: answers (gray areas resolved)
+    O->>FS: write CONTEXT.md (locked decisions)
+
+    Note over U,GIT: PLAN PHASE
+    U->>O: /gsd-plan-phase 1
+    O->>SDK: init plan-phase 1
+    O->>A: spawn researcher + pattern-mapper (parallel)
+    A-->>FS: RESEARCH.md + PATTERNS.md
+    O->>A: spawn planner
+    A-->>FS: plan-1.md, plan-2.md, plan-3.md
+    O->>A: spawn plan-checker
+    A-->>O: checker verdict
+    alt Revision needed
+        O->>A: spawn planner (revision mode)
+        A-->>FS: updated plans
+        O->>A: spawn plan-checker again
+    end
+
+    Note over U,GIT: EXECUTE PHASE
+    U->>O: /gsd-execute-phase 1
+    O->>SDK: init execute-phase 1
+    SDK-->>O: PLAN.md files + wave grouping
+    Note over O,A: Wave 1 — parallel
+    O->>A: spawn executor (plan-1) [fresh ctx]
+    O->>A: spawn executor (plan-2) [fresh ctx]
+    A->>GIT: implement task 1 → commit
+    A->>GIT: implement task 2 → commit
+    A->>GIT: implement task 3 → commit
+    A-->>FS: write SUMMARY.md
+    Note over O,A: Wait for all Wave 1
+    Note over O,A: Wave 2 — parallel
+    O->>A: spawn executor (plan-3) [fresh ctx]
+    A->>GIT: implement + commit
+
+    Note over U,GIT: VERIFY WORK
+    U->>O: /gsd-verify-work 1
+    O->>SDK: init verify-work 1
+    O->>A: spawn verifier [fresh ctx]
+    A->>FS: read plans + summaries + codebase
+    A-->>FS: write VERIFICATION.md
+    alt Gaps found
+        O->>U: present fix plans
+        U->>O: approve
+        O->>A: spawn executors for fixes
+    end
+
+    Note over U,GIT: SHIP
+    U->>O: /gsd-ship 1
+    O->>A: spawn code-reviewer [fresh ctx]
+    A-->>O: REVIEW.md findings
+    O->>GIT: gh pr create (auto-body from artifacts)
+    O->>U: PR URL

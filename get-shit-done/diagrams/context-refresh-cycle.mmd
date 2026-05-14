@@ -1,0 +1,58 @@
+flowchart LR
+    subgraph SESSION["New Session / /clear"]
+        S1["Session starts\n(clean context)"]
+    end
+
+    subgraph LOAD["Context Loading"]
+        L1["gsd-sdk query\ninit <workflow> <phase>"]
+        L2["Reads:\n• PROJECT.md\n• REQUIREMENTS.md\n• STATE.md\n• ROADMAP.md\n• phases/N/CONTEXT.md"]
+        L3["Produces:\ncompact JSON payload\n(~2K–5K tokens)\nor @file: for large payloads"]
+        L1 --> L2 --> L3
+    end
+
+    subgraph ORCH["Orchestrator (session)"]
+        O1["Receives compact payload\n~500 tokens consumed\nby orchestrator itself"]
+        O2["Formats agent-specific\nsub-payloads\n(targeted — not full payload)"]
+    end
+
+    subgraph AGENT["Fresh Agent (isolated)"]
+        A1["New 200K context\n(zero history)"]
+        A2["Receives agent payload:\n• Relevant PLAN.md\n• Relevant codebase\n• Role instructions"]
+        A3["Heavy work:\nplan / implement / verify"]
+        A4["Writes artifacts:\nPLAN.md / SUMMARY.md\nVERIFICATION.md / code"]
+        A1 --> A2 --> A3 --> A4
+    end
+
+    subgraph PERSIST["Artifact Persistence"]
+        P1[".planning/ files\n(survive sessions)"]
+        P2["STATE.md updated\n(decisions, progress)"]
+        P3["Git commits\n(implementation history)"]
+    end
+
+    subgraph NEXT["Next Session"]
+        N1["Load same artifacts\nfrom .planning/\nFull context restored\nwithout conversation history"]
+    end
+
+    subgraph ROT["Context Rot Prevention"]
+        R1["Main session stays thin:\n30–40% utilization\nthroughout project"]
+        R2["Each agent fresh:\nno quality decay\nacross phases"]
+        R3["Artifacts = memory:\nno reliance on\nconversation history"]
+    end
+
+    S1 --> L1
+    L3 --> O1
+    O1 --> O2
+    O2 --> A1
+    A4 --> P1
+    A4 --> P2
+    A3 --> P3
+    P1 --> N1
+    N1 --> L1
+
+    P1 --> R3
+    A1 --> R2
+    O1 --> R1
+
+    style ROT fill:#4f4,color:#000
+    style AGENT fill:#44f,color:#fff
+    style SESSION fill:#888,color:#fff

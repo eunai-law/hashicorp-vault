@@ -1,0 +1,59 @@
+flowchart TD
+    USER["User\n(thin session context)"]
+
+    subgraph ORCH_LAYER["Orchestration Layer (runs in session)"]
+        NP_O["/gsd-new-project\norchestrator"]
+        PP_O["/gsd-plan-phase\norchestrator"]
+        EP_O["/gsd-execute-phase\norchestrator"]
+        VW_O["/gsd-verify-work\norchestrator"]
+        SH_O["/gsd-ship\norchestrator"]
+    end
+
+    subgraph RESEARCH_POOL["Research Agents (fresh 200K, parallel)"]
+        PR1["gsd-project-researcher\n[domain research]"]
+        PR2["gsd-project-researcher\n[tech research]"]
+        PR3["gsd-project-researcher\n[competitive]"]
+        PR4["gsd-project-researcher\n[requirements]"]
+        RS["gsd-research-synthesizer\n[combines 4 outputs]"]
+        RM["gsd-roadmapper\n[produces ROADMAP.md]"]
+        PR1 & PR2 & PR3 & PR4 --> RS --> RM
+    end
+
+    subgraph PLANNING_POOL["Planning Agents (fresh 200K, sequential)"]
+        PHR["gsd-phase-researcher\n+ gsd-pattern-mapper\n(parallel pair)"]
+        PL["gsd-planner\n[produces PLAN.md files]"]
+        PC["gsd-plan-checker\n[8-dimension validation]"]
+        PHR --> PL --> PC
+        PC --> |"revise (0–3×)"| PL
+    end
+
+    subgraph EXEC_POOL["Execution Agents (fresh 200K, wave-parallel)"]
+        direction LR
+        EX1["gsd-executor\nplan-1"]
+        EX2["gsd-executor\nplan-2"]
+        EX3["gsd-executor\nplan-3"]
+        EX_W2["gsd-executor\nplan-4\n(wave 2)"]
+        EX1 & EX2 & EX3 --> |"Wave 1 complete"| EX_W2
+    end
+
+    subgraph QA_POOL["Quality Agents (fresh 200K, sequential)"]
+        VR["gsd-verifier\n[goal-backward analysis]"]
+        CR["gsd-code-reviewer\n[bug + security review]"]
+        CF["gsd-code-fixer\n[optional auto-fix]"]
+        VR --> CR --> CF
+    end
+
+    subgraph ISOLATION["Isolation Boundaries"]
+        I1["Each agent: NO session history\nNO sibling context\nNO parent conversation"]
+        I2["Context passed via:\nstructured JSON payload\n+ .planning/ artifact reads"]
+    end
+
+    USER --> NP_O & PP_O & EP_O & VW_O & SH_O
+    NP_O --> RESEARCH_POOL
+    PP_O --> PLANNING_POOL
+    EP_O --> EXEC_POOL
+    VW_O --> QA_POOL
+    SH_O --> QA_POOL
+
+    style ISOLATION fill:#faa,stroke:#f00
+    style EXEC_POOL fill:#ff9,stroke:#880

@@ -1,0 +1,61 @@
+flowchart TD
+    subgraph BASELINE["Baseline Token Cost (every session)"]
+        NS["Namespace routers\n~120 tokens\n(vs 2,150 for flat listing)"]
+        SM["Skill manifest cache\n~50 tokens"]
+    end
+
+    subgraph DISCUSS["discuss-phase — Very Low"]
+        D1["Interactive conversation\n~2K–5K tokens\nNo agents spawned"]
+    end
+
+    subgraph PLAN["plan-phase — High"]
+        P1["SDK init payload\n~2K tokens"]
+        P2["Researcher agent\n~20K–50K tokens\n(codebase + web search)"]
+        P3["Pattern mapper\n~15K–25K tokens\n(codebase only)"]
+        P4["Planner agent\n~15K–30K tokens"]
+        P5["Plan checker\n~10K–20K tokens"]
+        P6["Revision loop ×0–3\n~25K–40K each"]
+        P1 --> P2 & P3 --> P4 --> P5 --> P6
+    end
+
+    subgraph EXECUTE["execute-phase — Very High (scales with plans × tasks)"]
+        E1["SDK init + wave grouping\n~2K tokens"]
+        E2["Wave 1: N executors × 25–80K\n(parallel — each billed independently)"]
+        E3["Wave 2: M executors × 25–80K\n(after wave 1 completes)"]
+        E1 --> E2 --> E3
+    end
+
+    subgraph VERIFY["verify-work — Medium"]
+        V1["SDK init\n~1K tokens"]
+        V2["Verifier agent\n~15K–40K tokens\n(reads plans + code)"]
+        V1 --> V2
+    end
+
+    subgraph SHIP["ship — Medium"]
+        S1["Code reviewer\n~20K–60K tokens"]
+        S2["Code fixer (optional)\n~20K–40K tokens"]
+        S3["PR creation\n~1K tokens"]
+        S1 --> S2 --> S3
+    end
+
+    subgraph HIDDEN["Hidden Token Costs"]
+        H1["MCP tool schemas\n(biggest lever — trim unused MCPs)"]
+        H2["Plan revision loops\n(2.5× cost if 3 revisions)"]
+        H3["Agent context init\n(~1.5K per agent spawn)"]
+        H4["Verification failures\n→ re-execution = 150–200% cost)"]
+    end
+
+    subgraph TOTAL["Total Project Estimate"]
+        T1["Small project (3 phases, 3 plans each):\n~600K–900K tokens"]
+        T2["Medium project (6 phases, 4 plans each):\n~1.5M–2.5M tokens"]
+        T3["Large project (12 phases, 5 plans each):\n~4M–7M tokens"]
+    end
+
+    style BASELINE fill:#6f6,color:#000
+    style DISCUSS fill:#9f9,color:#000
+    style PLAN fill:#fa4,color:#000
+    style EXECUTE fill:#f44,color:#fff
+    style VERIFY fill:#fa4,color:#000
+    style SHIP fill:#fa4,color:#000
+    style HIDDEN fill:#a4f,color:#fff
+    style TOTAL fill:#44f,color:#fff
